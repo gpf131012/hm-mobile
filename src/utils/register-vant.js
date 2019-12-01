@@ -7,7 +7,9 @@ import {
   NavBar,
   Field,
   Toast,
-  Loading
+  Loading,
+  Tabbar,
+  TabbarItem
 
 } from 'vant'
 
@@ -19,3 +21,5 @@ Vue
   .use(Field)
   .use(Toast)
   .use(Loading)
+  .use(Tabbar)
+  .use(TabbarItem)
