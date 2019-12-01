@@ -8,7 +8,7 @@
     <!-- 表单 -->
     <van-cell-group>
     <van-field
-    v-model="user.mpbile"
+    v-model="user.mobile"
         label="手机号:"
         required
         clearable
@@ -33,6 +33,7 @@
 
 <script>
 import { login } from '@/api/user'
+
 export default {
   name: 'LoginPage',
   components: {},

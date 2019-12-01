@@ -6,7 +6,7 @@ import request from '@/utils/request'
 
 export function login (data) {
   return request({
-    method: 'Post',
+    method: 'POST',
     url: '/app/v1_0/authorizations',
     data
   })
