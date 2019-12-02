@@ -9,7 +9,11 @@ import {
   Toast,
   Loading,
   Tabbar,
-  TabbarItem
+  TabbarItem,
+  Tab,
+  Tabs,
+  List,
+  PullRefresh
 
 } from 'vant'
 
@@ -23,3 +27,7 @@ Vue
   .use(Loading)
   .use(Tabbar)
   .use(TabbarItem)
+  .use(Tab)
+  .use(Tabs)
+  .use(List)
+  .use(PullRefresh)
