@@ -21,6 +21,7 @@
                     finished-text="没有更多了"
                     @load="onLoad"
                 >
+
                 <van-cell
                     v-for="article in channel.articles"
                     :key="article.art_id.toString()"
@@ -107,15 +108,34 @@ export default {
       channels.forEach(channel => {
         channel.articles = [] // 频道文章列表
         channel.finished = false // 频道的加载结束状态
+        channel.loading = false //  存储频道的加载更多的loading 状态
         channel.timestamp = null // 用于获取下一页数据的时间戳
+        channel.isPullDowmLoading = false // 存储频道的下拉刷新loading状态
       })
       this.channels = channels //
     },
-    onRefresh () {
-      setTimeout(() => {
-        this.$toast('刷新成功')
-        this.isLoading = false
-      }, 2000)
+    // 下拉刷新
+    async onRefresh () {
+      // 获取当期激活频道对象
+      const activeChannel = this.channels[this.active]
+      // 1.请求获取最新推荐文章列表
+      const res = await getArticles({
+        channel_id: activeChannel.id,
+        timestamp: Date.now(), // 下拉刷新永远都是在获取最新推荐的文章列表，所以传递当前最新时间戳
+        with_top: 1
+      })
+      // 将数据添加到文章列表顶部
+      activeChannel.articles.unshift(...res.data.data.results)
+      activeChannel.isPullDowmLoading = false
+
+      // const articles = res.data.data.results
+      // activeChannel.articles.unshigt(...articles)
+      // 停止下拉转圈圈
+      this.isLoading = false
+      // const message = articles.length
+      // ? `更新了${articles.length}条数据` : '暂无数据'
+
+      this.$toast('更新成功')
     }
   }
 
