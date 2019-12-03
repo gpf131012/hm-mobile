@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="home">
       <van-nav-bar
             title="首页"
             left-arrow
@@ -26,7 +26,21 @@
                     v-for="article in channel.articles"
                     :key="article.art_id.toString()"
                     :title="article.title"
-                />
+                >
+                <div slot="label">
+                  <van-grid :border="false" :column-num="3">
+                    <van-grid-item v-for="(img,index) in article.cover.images"
+                    :key="index">
+                      <van-image height="80" :src="img" lazyload/>
+                    </van-grid-item>
+                  </van-grid>
+                  <div class="article-info">
+                    <span>{{article.aut_name}}</span>
+                    <span>{{ article.comm_count}}评论</span>
+                    <span>{{ article.pubdate | relativeTime}}</span>
+                  </div>
+                </div>
+                </van-cell>
             </van-list>
             </van-pull-refresh>
             </van-tab>
@@ -142,6 +156,10 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped lang="less">
+  .home {
+    .article-info span {
+      margin-right:10px
+    }
+  }
 </style>
