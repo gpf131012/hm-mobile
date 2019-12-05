@@ -3,25 +3,26 @@
       <van-nav-bar
             title="首页"
             left-arrow
+            fixed
         />
         <van-tabs v-model="active">
-            <van-tab
-            :title="channel.name"
-            v-for="channel in channels "
-            :key="channel.id">
+          <van-tab
+          :title="channel.name"
+          v-for="channel in channels "
+          :key="channel.id">
                  <!--
           文章列表
           van-pull-refresh 下拉刷新功能
           van-list 列表，带有上拉加载更多功能
         -->
-            <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
+            <van-pull-refresh v-model="isLoading"
+            @refresh="onRefresh">
                 <van-list
                     v-model="loading"
                     :finished="channel.finished"
                     finished-text="没有更多了"
                     @load="onLoad"
                 >
-
                 <van-cell
                     v-for="article in channel.articles"
                     :key="article.art_id.toString()"
@@ -44,13 +45,55 @@
             </van-list>
             </van-pull-refresh>
             </van-tab>
+              <!-- 面包按钮 -->
+            <div slot="nav-right"
+              class="wap-nav"
+              @click="isChannelShow = true">
+              <van-icon name="wap-nav" size="24" />
+            </div>
+              <!-- /面包按钮 -->
         </van-tabs>
+        <!-- // 频道管理弹窗 -->
+        <van-popup
+          v-model="isChannelShow"
+          round
+          closeable
+          close-icon-position="top-left"
+          position="bottom"
+          :style="{ height: '90%' }"
+          @open="onChannelOpen"
+        >
+          <div class="channel-container">
+              <van-cell title="我的频道" :border="false">
+              <van-button type="danger" size="mini">编辑</van-button>
+            </van-cell>
+            <van-grid :gutter="10">
+              <van-grid-item
+                v-for="channel in channels"
+                :key="channel.id"
+                :text="channel.name"
+              />
+            </van-grid>
+
+            <van-cell title="推荐频道" :border="false" />
+            <van-grid :gutter="10">
+              <van-grid-item
+                v-for="channel in recommendChannels"
+                :key="channel.id"
+                :text="channel.name"
+                @click = "onChannelAdd(channel)"
+              />
+            </van-grid>
+          </div>
+        </van-popup>
   </div>
 </template>
 
 <script>
 import { getUserChannels } from '@/api/user'
 import { getArticles } from '@/api/article'
+import { getAllChannels } from '@/api/channels'
+
 export default {
   name: 'HomePage',
   components: {},
@@ -62,18 +105,42 @@ export default {
       loading: false,
       finished: false,
       isLoading: false,
-      channels: [] // 频道列表
-
+      channels: [], // 频道列表
+      isChannelShow: false,
+      allChannels: [] // 所有频道列表
     }
   },
-  computed: {},
+  computed: {
+    recommendChannels () {
+      const arr = []
+      // 遍历所有频道
+      this.allChannels.forEach(channel => {
+        // 我的频道列表中是否包含当前遍历项
+        const ret = this.channels.find(item => {
+          // console.log(ret)
+          return item.id === channel.id
+        })
+        // 如果不包含，那就收集到arr中
+        if (!ret) {
+          arr.push(channel)
+        }
+      })
+      return arr
+    }
+  },
   watch: {
   },
   created () {
     this.loadUserChannels()
   },
   methods: {
-
+    // 当弹出层打开的时候触发
+    async onChannelOpen () {
+      const res = await getAllChannels()
+      // console.log(res)
+      this.allChannels = res.data.data.channels
+      // console.log(this.allChannels)
+    },
     async onLoad () {
       // 获取当前频道
       // this.active双向绑定了标签页组件，该组件正好对应频道的索引
@@ -148,8 +215,11 @@ export default {
       this.isLoading = false
       // const message = articles.length
       // ? `更新了${articles.length}条数据` : '暂无数据'
-
       this.$toast('更新成功')
+    },
+    onChannelAdd (channel) {
+      // 将电机的频道项
+      this.channels.push(channel)
     }
   }
 
@@ -158,8 +228,33 @@ export default {
 
 <style scoped lang="less">
   .home {
+     .channel-container {
+    padding-top: 30px;
+  }
     .article-info span {
       margin-right:10px
+    }
+    .van-tabs {
+      // 频道列表
+      /deep/ .van-tabs__wrap {
+      position: fixed;
+      top: 46px;
+      z-index: 2;
+      right: 0;
+      left: 0;
+    }
+    // 频道内容
+    /deep/ .van-tabs__content {
+      margin-top: 90px;
+    }
+    }
+    .wap-nav {
+      position: sticky;
+      right: 0;
+      display: flex;
+      align-items: center;
+      background-color: #fff;
+      opacity: 0.8; // 遮罩
     }
   }
 </style>
