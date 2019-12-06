@@ -3,6 +3,8 @@ import VueRouter from 'vue-router'
 import login from '@/views/login'
 import Tabbar from '@/views/tabbar'
 import Home from '@/views/home'
+import Search from '@/views/search'
+
 Vue.use(VueRouter)
 // 配置路由表
 const routes = [
@@ -20,6 +22,10 @@ const routes = [
       }
 
     ]
+  },
+  {
+    path: '/search',
+    component: Search
   }
 ]
 

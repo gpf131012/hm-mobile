@@ -1,10 +1,17 @@
 <template>
   <div class="home">
       <van-nav-bar
-            title="首页"
-            left-arrow
             fixed
-        />
+        >
+          <van-button
+            class="search-button"
+            slot="title"
+            round
+            type="info"
+            size="mini"
+            @click="$router.push('/search')"
+          >搜索</van-button>
+        </van-nav-bar>
         <van-tabs v-model="active">
           <van-tab
           :title="channel.name"
@@ -65,14 +72,24 @@
         >
           <div class="channel-container">
               <van-cell title="我的频道" :border="false">
-              <van-button type="danger" size="mini">编辑</van-button>
+              <van-button type="danger" size="mini"
+              @click = "isEdit = !isEdit"
+              >{{isEdit ? '完成' :'编辑'}}</van-button>
             </van-cell>
             <van-grid :gutter="10">
               <van-grid-item
-                v-for="channel in channels"
+                v-for="(channel,index ) in channels"
                 :key="channel.id"
                 :text="channel.name"
-              />
+                @click="onChannelActiveDelice(channel,index)"
+              >
+                <van-icon slot="icon"
+                  v-show="isEdit"
+                  size="15"
+                  name="close"
+                  class="close-icon"
+                ></van-icon>
+              </van-grid-item>
             </van-grid>
 
             <van-cell title="推荐频道" :border="false" />
@@ -93,6 +110,7 @@
 import { getUserChannels } from '@/api/user'
 import { getArticles } from '@/api/article'
 import { getAllChannels } from '@/api/channels'
+import { setItem, getItem } from '@/utils/storage'
 
 export default {
   name: 'HomePage',
@@ -107,7 +125,8 @@ export default {
       isLoading: false,
       channels: [], // 频道列表
       isChannelShow: false,
-      allChannels: [] // 所有频道列表
+      allChannels: [], // 所有频道列表
+      isEdit: false // 控制删除频道显示
     }
   },
   computed: {
@@ -129,6 +148,9 @@ export default {
     }
   },
   watch: {
+    channels () {
+      setItem('channels', this.channels)
+    }
   },
   created () {
     this.loadUserChannels()
@@ -184,16 +206,25 @@ export default {
       }
     },
     async loadUserChannels () {
-      const res = await getUserChannels()
-      const channels = res.data.data.channels
-      channels.forEach(channel => {
-        channel.articles = [] // 频道文章列表
-        channel.finished = false // 频道的加载结束状态
-        channel.loading = false //  存储频道的加载更多的loading 状态
-        channel.timestamp = null // 用于获取下一页数据的时间戳
-        channel.isPullDowmLoading = false // 存储频道的下拉刷新loading状态
-      })
-      this.channels = channels //
+      let channels = []
+      const localChannels = getItem('channels')
+      // 如果有本地存储的频道列表，则获取使用
+      if (localChannels) {
+        channels = localChannels
+      } else {
+        // 如果没有，则请求获取线上推荐的频道列表
+        const res = await getUserChannels()
+        const onLineChannels = res.data.data.channels
+        onLineChannels.forEach(channel => {
+          channel.articles = [] // 频道文章列表
+          channel.finished = false // 频道的加载结束状态
+          channel.loading = false //  存储频道的加载更多的loading 状态
+          channel.timestamp = null // 用于获取下一页数据的时间戳
+          channel.isPullDowmLoading = false // 存储频道的下拉刷新loading状态
+        })
+        channels = onLineChannels
+      }
+      this.channels = channels//
     },
     // 下拉刷新
     async onRefresh () {
@@ -220,6 +251,17 @@ export default {
     onChannelAdd (channel) {
       // 将电机的频道项
       this.channels.push(channel)
+      // 不需要刷新，我的频道改变，计算属性recommendChannel改变
+    },
+    onChannelActiveDelice (channel, index) {
+      if (this.isEdit && channel.name !== '推荐') {
+        // 编辑状态，执行删除操作
+        this.channels.splice(index, 1)
+      } else {
+        // 非编辑状态，执行切换频道
+        this.active = index
+        this.isChannelShow = false
+      }
     }
   }
 
@@ -255,6 +297,15 @@ export default {
       align-items: center;
       background-color: #fff;
       opacity: 0.8; // 遮罩
+    }
+    .close-icon{
+      position: absolute;
+      top: -12px;
+      right: -30px;
+    }
+    .search-button {
+      width: 100px;
+      background-color: #5babfb;
     }
   }
 </style>
