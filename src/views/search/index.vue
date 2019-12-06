@@ -17,10 +17,11 @@
     <van-cell-group>
       <van-cell
         icon="search"
-        :title="item"
         :key="item"
         v-for="item in suggestions"
-       />
+       >
+       <div slot="title" v-html="highlight(item)"></div>
+       </van-cell>
     </van-cell-group>
     <!-- /联想建议 -->
 
@@ -68,8 +69,18 @@ export default {
       }
       const res = await getSuggestions(this.searchText)
       this.suggestions = res.data.data.options
+    },
+    highlight (str) {
+    // this.searchText 注：这里的一切都是字符串
+    // 如果想动态创建一个正则表达式，使用new RegExp 手动构造
+    // 他会根据字符串创建一正则表达式
+    // 参数2，用来指定匹配模式，例如h劝酒，i忽略大小写
+    // dsadsa/gi
+      const reg = new RegExp(this.searchText, 'ig')
+      return str.replace(reg, `<span style="color:red">${this.searchText}</span>`)
     }
   }
+
 }
 </script>
 
