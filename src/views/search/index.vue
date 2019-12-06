@@ -9,7 +9,7 @@
       @search="onSearch"
       @input= "onSearchInput"
     >
-      <div slot="action" @click="onSearch">搜索</div>
+      <div slot="action" @click="onSearch(searchText)">搜索</div>
     </van-search>
     <!-- /搜索框 -->
 
@@ -19,6 +19,7 @@
         icon="search"
         :key="item"
         v-for="item in suggestions"
+        @click="onSearch(item)"
        >
        <div slot="title" v-html="highlight(item)"></div>
        </van-cell>
@@ -61,7 +62,9 @@ export default {
   },
   created () {},
   methods: {
-    onSearch () {},
+    onSearch (q) {
+      this.$router.push(`/search/${q}`)
+    },
     async onSearchInput () {
       const searchText = this.searchText.trim()
       if (!searchText) {

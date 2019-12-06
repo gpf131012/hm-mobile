@@ -4,6 +4,7 @@ import login from '@/views/login'
 import Tabbar from '@/views/tabbar'
 import Home from '@/views/home'
 import Search from '@/views/search'
+import SearchResult from '@/views/search-result'
 
 Vue.use(VueRouter)
 // 配置路由表
@@ -26,6 +27,10 @@ const routes = [
   {
     path: '/search',
     component: Search
+  },
+  {
+    path: '/search/:q',
+    component: SearchResult
   }
 ]
 
