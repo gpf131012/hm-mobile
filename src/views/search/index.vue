@@ -27,25 +27,33 @@
     <!-- /联想建议 -->
 
      <!-- 搜索历史记录 -->
-     <van-cell-group>
-       <van-cell title="历史记录">
-         <span>全部删除</span>&nbsp;&nbsp;
-         <span>完成</span>
-         <van-icon name="delete" />
-       </van-cell>
-       <van-cell title="单元格">
-         <van-icon name="close" />
-       </van-cell>
-       <van-cell title="单元格">
-         <van-icon name="close" />
-       </van-cell>
-     </van-cell-group>
-     <!-- /搜索历史记录 -->
+        <van-cell-group>
+        <van-cell title="历史记录">
+          <div v-show="isDelectShow">
+            <span>全部删除</span>&nbsp;&nbsp;
+            <span @click="isDelectShow = false">完成</span>
+          </div>
+            <van-icon
+              v-show="!isDelectShow"
+              @click="isDelectShow = true"
+              name="delete" />
+        </van-cell>
+        <van-cell
+            :title="item"
+            :key="item"
+            v-for="item in searchchHistories"
+            @click="onSearch(item)"
+        >
+            <van-icon v-show="isDelectShow" name="close" />
+        </van-cell>
+</van-cell-group>
+<!-- /搜索历史记录 -->
   </div>
 </template>
 
 <script>
 import { getSuggestions } from '@/api/search'
+import { setItem, getItem } from '@/utils/storage'
 
 export default {
   name: 'SearchPage',
@@ -54,7 +62,9 @@ export default {
   data () {
     return {
       searchText: '', // 用户输入的搜索文本
-      suggestions: []
+      suggestions: [],
+      searchchHistories: getItem('search-histories') || [], // 搜索历史记录
+      isDelectShow: false
     }
   },
   computed: {},
@@ -63,6 +73,18 @@ export default {
   created () {},
   methods: {
     onSearch (q) {
+      if (!q.trim()) {
+        return
+      }
+      // 最新的在最前面
+      const index = this.searchchHistories.indexOf(q)
+      if (index !== -1) {
+        this.searchchHistories.splice(index, 1)
+      }
+      // 在跳转完成之前将搜索的关键字记录到收拾利索记录中
+      this.searchchHistories.unshift(q)
+      // 将搜索历史记录放到本地存储，以便持久化
+      setItem('search-histories', this.searchchHistories)
       this.$router.push(`/search/${q}`)
     },
     async onSearchInput () {
