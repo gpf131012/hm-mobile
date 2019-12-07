@@ -14,7 +14,7 @@
     <!-- /搜索框 -->
 
     <!-- 联想建议 -->
-    <van-cell-group>
+    <van-cell-group v-show="searchText">
       <van-cell
         icon="search"
         :key="item"
@@ -27,10 +27,10 @@
     <!-- /联想建议 -->
 
      <!-- 搜索历史记录 -->
-        <van-cell-group>
+        <van-cell-group v-show="!searchText">
         <van-cell title="历史记录">
           <div v-show="isDelectShow">
-            <span>全部删除</span>&nbsp;&nbsp;
+            <span @click = "searchchHistories =[]">全部删除</span>&nbsp;&nbsp;
             <span @click="isDelectShow = false">完成</span>
           </div>
             <van-icon
@@ -44,7 +44,11 @@
             v-for="item in searchchHistories"
             @click="onSearch(item)"
         >
-            <van-icon v-show="isDelectShow" name="close" />
+            <van-icon
+              v-show="isDelectShow"
+              name="close"
+              @click.stop="searchchHistories.splice(index,1)"
+              />
         </van-cell>
 </van-cell-group>
 <!-- /搜索历史记录 -->
@@ -69,6 +73,9 @@ export default {
   },
   computed: {},
   watch: {
+    searchchHistories () {
+      setItem('search-histories', this.searchchHistories)
+    }
   },
   created () {},
   methods: {
