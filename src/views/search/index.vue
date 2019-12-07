@@ -58,6 +58,8 @@
 <script>
 import { getSuggestions } from '@/api/search'
 import { setItem, getItem } from '@/utils/storage'
+import { debounce } from 'lodash'
+// import { async } from 'q'
 
 export default {
   name: 'SearchPage',
@@ -94,14 +96,19 @@ export default {
       setItem('search-histories', this.searchchHistories)
       this.$router.push(`/search/${q}`)
     },
-    async onSearchInput () {
-      const searchText = this.searchText.trim()
-      if (!searchText) {
-        return
-      }
-      const res = await getSuggestions(this.searchText)
-      this.suggestions = res.data.data.options
-    },
+    // async onSearchInput () {
+    // onSearchInput: debounce(async function () {
+    //   const searchText = this.searchText.trim()
+    //   if (!searchText) {
+    //     return
+    //   }
+    //   const res = await getSuggestions({
+    //     q: this.searchText
+    //   })
+    //   const SearchSuggestions = res.data.data.options
+    //   this.searchchHistories = SearchSuggestions
+    // }, 300),
+
     highlight (str) {
     // this.searchText 注：这里的一切都是字符串
     // 如果想动态创建一个正则表达式，使用new RegExp 手动构造
@@ -110,7 +117,16 @@ export default {
     // dsadsa/gi
       const reg = new RegExp(this.searchText, 'ig')
       return str.replace(reg, `<span style="color:red">${this.searchText}</span>`)
-    }
+    },
+    onSearchInput: debounce(async function () {
+      const searchText = this.searchText.trim()
+      if (!searchText) {
+        return
+      }
+      const res = await getSuggestions(this.searchText)
+      const SearchSuggestions = res.data.data.options
+      this.suggestions = SearchSuggestions
+    }, 300)
   }
 
 }
