@@ -27,7 +27,9 @@
           <p style="color: #363636;">{{item.content}}</p>
           <p>
             <span style="margin-right: 10px;">{{item.pubdate | relativeTime}}</span>
-            <van-button size="mini" type="default">回复</van-button>
+            <van-button size="mini" type="default"
+            @click="onReplyShow(item)"
+            >回复</van-button>
           </p>
         </div>
         <van-icon
@@ -57,22 +59,38 @@
       </van-field>
     </van-cell-group>
     <!-- /发布评论 -->
+    <!-- 评论回复 -->
+    <van-popup
+      v-model="isReplyShow"
+      round
+      position="bottom"
+      :style="{ height: '90%' }"
+    >
+     <comment-reply :comment="commentComment" />
+    </van-popup>
+    <!-- /评论回复 -->
   </div>
 </template>
 
 <script>
 import { getComments, addComment, addCommentlike, deleteCommentlike } from '@/api/comment'
+import CommentReply from './comment-reply'
 
 export default {
   name: 'ArticleComment',
   props: {},
+  components: {
+    CommentReply
+  },
   data () {
     return {
       list: [], // 评论列表
       loading: false, // 上拉加载更多的 loading
       finished: false, // 是否加载结束
       offset: null, // 获取下一页数据评论页码
-      inputComment: ''
+      inputComment: '',
+      isReplyShou: false,
+      currentComment: {} // 查看回复当前评论
     }
   },
 
@@ -119,6 +137,13 @@ export default {
       } else {
         this.finished = true
       }
+    },
+    /**
+     * 展示回复弹层
+     */
+    onReplyShow (comment) {
+      this.currentComment = comment
+      this.isReplyShow = true
     }
   }
 }
