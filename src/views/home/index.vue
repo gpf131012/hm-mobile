@@ -34,6 +34,7 @@
                     v-for="article in channel.articles"
                     :key="article.art_id.toString()"
                     :title="article.title"
+                    @click="$router.push(`/article/${article.art_id}`)"
                 >
                 <div slot="label">
                   <van-grid :border="false" :column-num="3">
